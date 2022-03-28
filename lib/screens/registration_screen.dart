@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 
 import '../constants.dart';
 import '../widgets/rounded_button.dart';
@@ -14,6 +15,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   late String email;
   late String password;
 
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,11 +27,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Hero(
-              tag: 'logo',
-              child: Container(
-                height: 200.0,
-                child: Image.asset('images/logo.png'),
+            Flexible(
+              child: Hero(
+                tag: 'logo',
+                child: Container(
+                  height: 200.0,
+                  child: Image.asset('images/logo.png'),
+                ),
               ),
             ),
             SizedBox(
@@ -64,6 +69,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 print(email);
                 print(password);
                 try {
+                  setState(() {
+                    isLoading = true;
+                  });
                   final newUser = await _auth.createUserWithEmailAndPassword(
                     email: email,
                     password: password,
@@ -74,8 +82,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 } catch (e) {
                   print('Error $e');
                 }
+                setState(() {
+                  isLoading = false;
+                });
               },
               color: Colors.blueAccent,
+              isLoading: isLoading,
             ),
           ],
         ),
