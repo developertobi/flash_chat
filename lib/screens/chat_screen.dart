@@ -81,25 +81,33 @@ class _ChatScreenState extends State<ChatScreen> {
           // crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             StreamBuilder<QuerySnapshot>(
-              stream: _firestoreInstance.collection('messages').snapshots(),
+              stream: _firestoreInstance
+                  .collection('messages')
+                  .orderBy('timeStamp')
+                  .snapshots(),
               builder: (context, snapshot) {
                 List<MessageBubble> messageBubbles = [];
                 if (!snapshot.hasData) {
                   return const CircularProgressIndicator();
                 }
                 if (snapshot.data != null) {
-                  final messages = snapshot.data?.docs;
+                  final messages = snapshot.data?.docs.reversed;
                   for (var message in messages!) {
                     final messageText = message.get('text');
                     final messageSender = message.get('sender');
                     messageBubbles.add(
-                      MessageBubble(sender: messageSender, text: messageText),
+                      MessageBubble(
+                        sender: messageSender,
+                        text: messageText,
+                        currentUserEmail: loggedInUser.email!,
+                      ),
                     );
                   }
                 }
 
                 return Expanded(
                   child: ListView.separated(
+                    reverse: true,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 20,
@@ -135,6 +143,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       messageTextController.clear();
                       //Implement send functionality.
                       _firestoreInstance.collection('messages').add({
+                        'timeStamp': FieldValue.serverTimestamp(),
                         'text': messageText,
                         'sender': loggedInUser.email,
                       });
